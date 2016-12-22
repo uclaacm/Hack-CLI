@@ -16,7 +16,7 @@ Events:
 	acm event delete [id]   - delete an event by its id
 	acm event delete all    - delete all events
 
-Showcase Projects:	
+Showcase Projects:
 	acm showcase list           - lists showcase projects
 	acm showcase details [id]   - gets more details about a showcase project
 	acm showcase add            - add a new showcase project
@@ -45,6 +45,9 @@ def main():
 		"showcase" : Showcase,
 		"cli" : Settings
 	}
-
+	if sys.argv[1] not in modules.keys():
+		print "invalid command"
+		print (USAGE_INFO())
+		sys.exit(1)
 	module = modules[sys.argv[1]](sys.argv[2], sys.argv[3:])
 	module.run()
