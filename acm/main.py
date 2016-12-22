@@ -3,6 +3,7 @@
 import sys
 from Event import Event
 from Showcase import Showcase
+from Settings import Settings
 
 def USAGE_INFO():
 	return """
@@ -41,7 +42,8 @@ def main():
 
 	modules = {
 		"event" : Event,
-		"showcase" : Showcase
+		"showcase" : Showcase,
+		"cli" : Settings
 	}
 
 	module = modules[sys.argv[1]](sys.argv[2], sys.argv[3:])
