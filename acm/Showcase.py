@@ -13,30 +13,29 @@ class Showcase(Module):
 			"delete" : self.delete
 		}
 		Module.__init__(self, cmd, cmd_args)
-	
+
 	def list(self):
 		r = requests.get(Global.makeURL("/api/v1/showcase"))
 		check(r.status_code == 200, "Malformed request to GET /api/v1/showcase")
-		
+
 		data = r.json()
 		print("Showcase Project List")
 		print("==========")
-
-		for project in data["projects"]:
-			self.printProjectObject(project, fields=["id","title"])
-
 		if len(data["projects"]) == 0:
-			print("No projects")
+			print "No projects"
+		else:
+			for project in data["projects"]:
+				self.printProjectObject(project, fields=["id", "title"])
 
 	def details(self):
 		check(len(self.cmd_args) > 0, "Getting project details requires a project ID")
-		
+
 		r = requests.get(Global.makeURL("/api/v1/showcase/%s"%self.cmd_args[0]))
 		check(r.status_code == 200, "Malformed request to GET /api/v1/showcase/%s"%self.cmd_args[0])
-		
+
 		data = r.json()
 		check(len(data["projects"]) > 0, "No project with ID '%s' found"%self.cmd_args[0])
-		
+
 		print("Showcase Project Details")
 		print("=============")
 		self.printProjectObject(data["projects"][0])
@@ -65,7 +64,7 @@ class Showcase(Module):
 
 	def update(self):
 		check(len(self.cmd_args) > 0, "Updating a project requires a project ID")
-		
+
 		r = requests.get(Global.makeURL("/api/v1/showcase/%s"%self.cmd_args[0]))
 		response = r.json()
 		check(r.status_code == 200 and response["success"] and len(response["projects"]) > 0, \
@@ -103,8 +102,13 @@ class Showcase(Module):
 
 	def delete(self):
 		check(len(self.cmd_args) > 0, "Deleting a project must specify 'all' or a project ID")
-		
-		q = "" if self.cmd_args[0] == "all" else "/" + self.cmd_args[0]
+		if self.cmd_args[0] == "all":
+			choice = raw_input("Do you really want to delete all showcase projects? [y/n] ")
+			check(choice == "y", "Aborted.")
+			q = ""
+		else:
+			q = "/" + self.cmd_args[0]
+
 		r = requests.delete(Global.makeURL("/api/v1/showcase" + q), json=Global.makeData())
 		check(r.status_code == 200, "Could not delete project(s). Status code: %d"%r.status_code)
 
@@ -119,5 +123,5 @@ class Showcase(Module):
 		if "link" in obj and "link" in fields: print(" link: %s"%obj["link"])
 		if "image" in obj and "image" in fields: print(" image: %s"%obj["image"])
 		if "desc" in obj and "desc" in fields: print(" desc: %s"%obj["desc"])
-			
+
 		print("---")

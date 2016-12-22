@@ -115,6 +115,7 @@ class Event(Module):
 			check(choice == "y", "Aborted.")
 			q = ""
 		else: q = "/" + self.cmd_args[0]
+
 		r = requests.delete(Global.makeURL("/api/v1/event" + q), json=Global.makeData())
 		check(r.status_code == 200, "Could not delete event(s). Status code: %d"%r.status_code)
 
