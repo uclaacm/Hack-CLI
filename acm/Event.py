@@ -15,6 +15,8 @@ class Event(Module):
 		Module.__init__(self, cmd, cmd_args)
 
 	def list(self):
+		# we eventually want to be able to accept a category command as well
+		# and filter those events, possibily in the print() function.
 		r = requests.get(Global.makeURL("/api/v1/event"))
 		check(r.status_code == 200, "Malformed request to GET /api/v1/event")
 
@@ -30,6 +32,8 @@ class Event(Module):
 		return data["events"] if len(data["events"]) > 0 else None
 
 	def details(self):
+		# once we have the functionality to search by category or title, we will
+		# probably want to change this function 
 		check(len(self.cmd_args) > 0, "Getting event details requires an event ID")
 
 		r = requests.get(Global.makeURL("/api/v1/event/%s"%self.cmd_args[0]))
@@ -129,7 +133,7 @@ class Event(Module):
 
 		numRemoved = int(r.json()["removed"])
 		print("%d event(s) deleted"%numRemoved if numRemoved > 0 else "No matching events deleted.")
-		
+
 		return r.json(), numRemoved
 
 	def printEventObject(self, obj, fields=["id","date","title","category","location","tagline","desc"]):

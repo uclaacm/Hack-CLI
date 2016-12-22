@@ -27,7 +27,15 @@ class TestAPI(unittest.TestCase):
 
 
     def test_event_details(self):
-        pass
+        # first get some event id
+        li = self.event_module.list()
+        if li is None:
+            return
+        self.event_details_module = self.modules["event"]("list", [li[0]["id"]])
+        print self.event_details_module.details()
+
+
+
 
     def test_event_add(self):
         pass
