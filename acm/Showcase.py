@@ -27,6 +27,8 @@ class Showcase(Module):
 			for project in data["projects"]:
 				self.printProjectObject(project, fields=["id", "title"])
 
+		return data["projects"] if len(data["projects"]) > 0 else None
+
 	def details(self):
 		check(len(self.cmd_args) > 0, "Getting project details requires a project ID")
 
@@ -39,6 +41,8 @@ class Showcase(Module):
 		print("Showcase Project Details")
 		print("=============")
 		self.printProjectObject(data["projects"][0])
+
+		return data["projects"][0]
 
 	def add(self):
 		print("Creating new project...")
@@ -61,6 +65,8 @@ class Showcase(Module):
 			print("Your project has been successfully created.")
 		else:
 			print("There was a error creating your project (%d). Check to make sure your input was valid"%r.status_code)
+
+		return r.json() if r.status_code == 200 else None
 
 	def update(self):
 		check(len(self.cmd_args) > 0, "Updating a project requires a project ID")
@@ -100,6 +106,8 @@ class Showcase(Module):
 		else:
 			print("There was an error updating your project (%d). Check to make sure your input was valid"%r.status_code)
 
+		return r.json() if r.status_code == 200 else None
+
 	def delete(self):
 		check(len(self.cmd_args) > 0, "Deleting a project must specify 'all' or a project ID")
 		if self.cmd_args[0] == "all":
@@ -114,6 +122,8 @@ class Showcase(Module):
 
 		numRemoved = int(r.json()["removed"])
 		print("%d project(s) deleted"%numRemoved if numRemoved > 0 else "No matching projects deleted.")
+
+		return r.json(), numRemoved
 
 	def printProjectObject(self, obj, fields=["id","date","title","contributors","link","image","desc"]):
 		if "id" in obj and "id" in fields: print(" id: %s"%obj["id"])

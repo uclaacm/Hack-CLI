@@ -27,6 +27,8 @@ class Event(Module):
 			for event in data["events"]:
 				self.printEventObject(event, fields=["id", "title"])
 
+		return data["events"] if len(data["events"]) > 0 else None
+
 	def details(self):
 		check(len(self.cmd_args) > 0, "Getting event details requires an event ID")
 
@@ -39,6 +41,8 @@ class Event(Module):
 		print("Event Details")
 		print("=============")
 		self.printEventObject(data["events"][0])
+
+		return data["events"][0]
 
 	def add(self):
 		print("Creating new event...")
@@ -65,6 +69,8 @@ class Event(Module):
 			print("Your event has been successfully created.")
 		else:
 			print("There was an error creating your event (%d). Check to make sure your input was valid"%r.status_code)
+
+		return r.json() if r.status_code == 200 else None
 
 	def update(self):
 		check(len(self.cmd_args) > 0, "Updating an event requires an event ID")
@@ -108,6 +114,8 @@ class Event(Module):
 		else:
 			print("There was an error updating your event (%d). Check to make sure your input was valid"%r.status_code)
 
+		return r.json() if r.status_code == 200 else None
+
 	def delete(self):
 		check(len(self.cmd_args) > 0, "Deleting an event must specify 'all' or an event ID")
 		if self.cmd_args[0] == "all":
@@ -121,6 +129,8 @@ class Event(Module):
 
 		numRemoved = int(r.json()["removed"])
 		print("%d event(s) deleted"%numRemoved if numRemoved > 0 else "No matching events deleted.")
+		
+		return r.json(), numRemoved
 
 	def printEventObject(self, obj, fields=["id","date","title","category","location","tagline","desc"]):
 		if "id" in obj and "id" in fields: print(" id: %s"%obj["id"])
