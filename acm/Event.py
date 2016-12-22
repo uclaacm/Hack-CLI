@@ -1,21 +1,23 @@
 from Module import Module
+from Global import check
 import Global
-import requests, pprint, ast
+import requests, pprint, ast, copy
 
 class Event(Module):
 	def __init__(self, cmd, cmd_args):
 		self.cmd_map = {
 			"list": self.list,
 			"details": self.details,
-			"add": self.add
+			"add": self.add,
+			"update" : self.update,
+			"delete" : self.delete
 		}
 		Module.__init__(self, cmd, cmd_args)
 	
 	def list(self):
 		r = requests.get(Global.makeURL("/api/v1/event"))
-		if (r.status_code != 200):
-			print("Error: Malformed request to GET /api/v1/event")
-			return
+		check(r.status_code == 200, "Malformed request to GET /api/v1/event")
+		
 		data = r.json()
 		print("Event List")
 		print("==========")
@@ -27,17 +29,14 @@ class Event(Module):
 			print("No events")
 
 	def details(self):
-		if len(self.cmd_args) == 0:
-			print("Error: event details requires the event ID")
-			return
+		check(len(self.cmd_args) > 0, "Getting event details requires and event ID")
+		
 		r = requests.get(Global.makeURL("/api/v1/event/%s"%self.cmd_args[0]))
-		if (r.status_code != 200):
-			print("Error: Malformed request to GET /api/v1/event/"%self.cmd_args[0])
-			return
+		check(r.status_code == 200, "Malformed request to GET /api/v1/event/%s"%self.cmd_args[0])
+		
 		data = r.json()
-		if len(data["events"]) == 0:
-			print("No event with ID %s found."%self.cmd_args[0])
-			return
+		check(len(data["events"]) > 0, "No event with ID '%s' found"%self.cmd_args[0])
+		
 		print("Event Details")
 		print("=============")
 		self.printEventObject(data["events"][0])
@@ -58,24 +57,74 @@ class Event(Module):
 			}
 		}
 
-		pprint.pprint(obj)
+		self.printEventObject(obj["event"])
 		choice = raw_input("Create this event? [y/n]: ")
-		if (choice != "y"):
-			print("Aborted.")
-			return
+		check(choice == "y", "Aborted.")
 
 		r = requests.post(Global.makeURL("/api/v1/event"), json=Global.makeData(obj))
 		if (r.status_code == 200):
 			print("Your event has been successfully created.")
 		else:
-			print("There was an error creating your event. Check to make sure your input was valid")
+			print("There was an error creating your event (%d). Check to make sure your input was valid"%r.status_code)
+
+	def update(self):
+		check(len(self.cmd_args) > 0, "Updating an event requires an event ID")
+		
+		r = requests.get(Global.makeURL("/api/v1/event/%s"%self.cmd_args[0]))
+		response = r.json()
+		check(r.status_code == 200 and response["success"] and len(response["events"]) > 0, \
+			"No event with id '%s' found."%self.cmd_args[0])
+
+		print("Current event data:")
+		self.printEventObject(response["events"][0])
+		print("You will now be prompted to update this event")
+		print(" - Only fill out fields you want to change")
+		print(" - To leave a field unchanged, press 'enter'")
+
+		obj = {
+			"event" : {
+				"title" : raw_input("title: "),
+				"location" : raw_input("location: "),
+				"category" : raw_input("category: "),
+				"date": {
+					"start" : Global.getDateInput("date.start"),
+					"end" : Global.getDateInput("date.end") 
+				},
+				"tagline" : raw_input("tagline: "),
+				"desc" : raw_input("desc: ")
+			}
+		}
+
+		obj["event"] = Global.trimDict(obj["event"])
+		print("---")
+		print("Event changes:")
+		self.printEventObject(obj["event"])
+
+		choice = raw_input("Make these changes? [y/n]: ")
+		check(choice == "y", "Aborted.")
+
+		r = requests.patch(Global.makeURL("/api/v1/event/%s"%self.cmd_args[0]), json=Global.makeData(obj))
+		if (r.status_code == 200):
+			print("Your event has been successfully updated.")
+		else:
+			print("There was an error updating your event (%d). Check to make sure your input was valid"%r.status_code)
+
+	def delete(self):
+		check(len(self.cmd_args) > 0, "Deleting an event must specify 'all' or an event ID")
+		
+		q = "" if self.cmd_args[0] == "all" else "/" + self.cmd_args[0]
+		r = requests.delete(Global.makeURL("/api/v1/event" + q), json=Global.makeData())
+		check(r.status_code == 200, "Could not delete event(s). Status code: %d"%r.status_code)
+
+		numRemoved = int(r.json()["removed"])
+		print("%d event(s) deleted"%numRemoved if numRemoved > 0 else "No matching events deleted.")
 
 	def printEventObject(self, obj, fields=["id","date","title","category","location","tagline","desc"]):
 		if "id" in obj and "id" in fields: print(" id: %s"%obj["id"])
 		if "date" in obj and "date" in fields:
 			print(" date:")
-			if "start" in obj["date"]: print("     start: %s"%obj["date"]["start"])
-			if "end" in obj["date"]: print("     end: %s"%obj["date"]["end"])
+			if "start" in obj["date"]: print("     start: %s"%Global.UTCToLocalDisplay(obj["date"]["start"]))
+			if "end" in obj["date"]: print("     end: %s"%Global.UTCToLocalDisplay(obj["date"]["end"]))
 		if "title" in obj and "title" in fields: print(" title: %s"%obj["title"])
 		if "category" in obj and "category" in fields: print(" category: %s"%obj["category"])
 		if "location" in obj and "location" in fields: print(" location: %s"%obj["location"])
