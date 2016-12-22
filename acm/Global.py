@@ -39,10 +39,15 @@ def UTCToLocalDisplay(utc):
 def trimDict(d):
 	newObj = {}
 	for key in d:
+		print(key, d[key])
 		if type(d[key]) == type({}):
 			val = trimDict(d[key])
 			if len(val) > 0:
 				newObj[key] = val
+		elif type(d[key]) == type([]):
+			if len(d[key]) > 0:
+				print("add arr", key, d[key], len(d[key]))
+				newObj[key] = d[key]
 		elif type(d[key]) == type(""):
 			if d[key].strip() != "":
 				newObj[key] = d[key].strip()
