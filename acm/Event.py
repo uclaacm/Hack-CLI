@@ -2,7 +2,7 @@ from Module import Module
 from Global import check
 import Global
 import requests, pprint, ast, copy
-
+import json
 class Event(Module):
 	def __init__(self, cmd, cmd_args):
 		self.cmd_map = {
@@ -12,28 +12,31 @@ class Event(Module):
 			"update" : self.update,
 			"delete" : self.delete
 		}
+		self.categories = {"hack school", "general"}
 		Module.__init__(self, cmd, cmd_args)
 
 	def list(self):
-		# we eventually want to be able to accept a category command as well
-		# and filter those events, possibily in the print() function.
+		filter = len(self.cmd_args) == 2 and self.cmd_args[0] == "--filter" and self.cmd_args[1].lower() in self.categories
+
 		r = requests.get(Global.makeURL("/api/v1/event"))
 		check(r.status_code == 200, "Malformed request to GET /api/v1/event")
 
 		data = r.json()
+		print data
 		print("Event List")
 		print("==========")
 		if len(data["events"]) == 0:
 			print "No events"
 		else:
 			for event in data["events"]:
-				self.printEventObject(event, fields=["id", "title"])
+				if not filter or (filter and data["events"]["category"].lower() == self.cmd_args[1].lower()):
+					self.printEventObject(event, fields=["id", "title"])
 
 		return data["events"] if len(data["events"]) > 0 else None
 
 	def details(self):
 		# once we have the functionality to search by category or title, we will
-		# probably want to change this function 
+		# probably want to change this function
 		check(len(self.cmd_args) > 0, "Getting event details requires an event ID")
 
 		r = requests.get(Global.makeURL("/api/v1/event/%s"%self.cmd_args[0]))
