@@ -14,3 +14,15 @@ Then run the CLI
 $ acm help
 ```
 
+By default, the CLI will use the API on the production server. If you want to switch to testing mode (use the server on `http://localhost:5000`), you can do that by setting the `use_local` property:
+
+```BASH
+$ acm cli set use_local 1
+```
+
+To revert to the production server,
+
+```bash
+$ acm cli set use_local 0
+```
+
