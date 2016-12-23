@@ -1,4 +1,5 @@
 from Settings import SettingsFile
+from Crypt import getToken
 from datetime import datetime
 from dateutil import tz
 from dateutil.parser import parse
@@ -16,9 +17,6 @@ def check(cond, msg=None):
 
 def makeURL(path):
 	return hostname + path
-
-def getToken():
-	return "1f4e84260a56245f229d311720a0d497baec20c91603dbe0ccd3bc08dc7f3525a47f52f2cb4273051bb072151d"
 
 def makeData(partial_obj={}):
 	obj = { "token" : getToken() }
