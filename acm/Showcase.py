@@ -51,6 +51,7 @@ class Showcase(Module):
 				"title" : raw_input("(required) title: "),
 				"link" : raw_input("(required) project link: "),
 				"contributors" : [x.strip() for x in raw_input("(required) contributors, comma-separated: ").split(",") if len(x.strip()) > 0],
+				"technologies" : [x.strip() for x in raw_input("(required) technologies, comma-separated: ").split(",") if len(x.strip()) > 0],
 				"image" : raw_input("(optional) image URL: "),
 				"desc" : raw_input("(optional) desc: ")
 			}
@@ -87,6 +88,7 @@ class Showcase(Module):
 				"title" : raw_input("title: "),
 				"link" : raw_input("project link: "),
 				"contributors" : [x.strip() for x in raw_input("contributors, comma-separated: ").split(",") if len(x.strip()) > 0],
+				"technologies" : [x.strip() for x in raw_input("technologies, comma-separated: ").split(",") if len(x.strip()) > 0],
 				"image" : raw_input("image URL: "),
 				"desc" : raw_input("desc: ")
 			}
@@ -101,8 +103,11 @@ class Showcase(Module):
 		check(choice == "y", "Aborted.")
 
 		r = requests.patch(Global.makeURL("/api/v1/showcase/%s"%self.cmd_args[0]), json=Global.makeData(obj))
-		if (r.status_code == 200):
+		if (r.status_code == 200 and r.json()["error"] == None):
 			print("Your project has been successfully updated.")
+		elif r.json()["error"] != None:
+			print("There was an error updating your project:")
+			pprint.pprint(r.json()["error"])
 		else:
 			print("There was an error updating your project (%d). Check to make sure your input was valid"%r.status_code)
 
@@ -125,11 +130,12 @@ class Showcase(Module):
 
 		return r.json(), numRemoved
 
-	def printProjectObject(self, obj, fields=["id","date","title","contributors","link","image","desc"]):
+	def printProjectObject(self, obj, fields=["id","date","title","contributors","technologies","link","image","desc"]):
 		if "id" in obj and "id" in fields: print(" id: %s"%obj["id"])
 		if "date" in obj and "date" in fields: print(" date: %s"%Global.UTCToLocalDisplay(obj["date"]))
 		if "title" in obj and "title" in fields: print(" title: %s"%obj["title"])
 		if "contributors" in obj and "contributors" in fields: print(" contributors: %s"%", ".join(obj["contributors"]))
+		if "technologies" in obj and "technologies" in fields: print(" technologies: %s"%", ".join(obj["technologies"]))
 		if "link" in obj and "link" in fields: print(" link: %s"%obj["link"])
 		if "image" in obj and "image" in fields: print(" image: %s"%obj["image"])
 		if "desc" in obj and "desc" in fields: print(" desc: %s"%obj["desc"])
