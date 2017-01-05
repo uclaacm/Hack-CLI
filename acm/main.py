@@ -3,6 +3,7 @@
 import sys
 from Event import Event
 from Showcase import Showcase
+from Session import Session
 from Settings import Settings
 
 def USAGE_INFO():
@@ -23,6 +24,15 @@ Showcase Projects:
 	acm showcase update [id]    - update a showcase project by its id
 	acm showcase delete [id]    - delete a showcase project by its id
 	acm showcase delete all     - delete all showcase projects
+
+Sessions:
+	acm session list           - lists session hack school sessions
+	acm session details [id]   - gets more details about a session
+	acm session add            - add a new hack school session
+	acm session update [id]    - update a session by its id
+	acm session delete [id]    - delete a session by its id
+	acm session delete all     - delete all hack school sessions
+
 	"""
 
 def main():
@@ -43,8 +53,10 @@ def main():
 	modules = {
 		"event" : Event,
 		"showcase" : Showcase,
+		"session" : Session,
 		"cli" : Settings
 	}
+
 	if sys.argv[1] not in modules.keys():
 		print "invalid command"
 		print (USAGE_INFO())
