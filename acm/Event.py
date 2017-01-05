@@ -69,10 +69,11 @@ class Event(Module):
 		check(choice == "y", "Aborted.")
 
 		r = requests.post(Global.makeURL("/api/v1/event"), json=Global.makeData(obj))
-		if (r.status_code == 200):
+		if (r.status_code == 200 and r.json()["success"]):
 			print("Your event has been successfully created.")
 		else:
-			print("There was an error creating your event (%d). Check to make sure your input was valid"%r.status_code)
+			print("There was an error creating your event:")
+			pprint.pprint(r.json()["error"])
 
 		return r.json() if r.status_code == 200 else None
 
@@ -113,10 +114,11 @@ class Event(Module):
 		check(choice == "y", "Aborted.")
 
 		r = requests.patch(Global.makeURL("/api/v1/event/%s"%self.cmd_args[0]), json=Global.makeData(obj))
-		if (r.status_code == 200):
+		if (r.status_code == 200 and r.json()["success"]):
 			print("Your event has been successfully updated.")
 		else:
-			print("There was an error updating your event (%d). Check to make sure your input was valid"%r.status_code)
+			print("There was an error updating your event:")
+			pprint.pprint(r.json()["error"])
 
 		return r.json() if r.status_code == 200 else None
 

@@ -62,10 +62,11 @@ class Showcase(Module):
 		check(choice == "y", "Aborted.")
 
 		r = requests.post(Global.makeURL("/api/v1/showcase"), json=Global.makeData(obj))
-		if (r.status_code == 200):
+		if (r.status_code == 200 and r.json()["success"]):
 			print("Your project has been successfully created.")
 		else:
-			print("There was a error creating your project (%d). Check to make sure your input was valid"%r.status_code)
+			print("There was a error creating your project:")
+			pprint.pprint(r.json()["error"])
 
 		return r.json() if r.status_code == 200 else None
 
@@ -103,13 +104,11 @@ class Showcase(Module):
 		check(choice == "y", "Aborted.")
 
 		r = requests.patch(Global.makeURL("/api/v1/showcase/%s"%self.cmd_args[0]), json=Global.makeData(obj))
-		if (r.status_code == 200 and r.json()["error"] == None):
+		if (r.status_code == 200 and r.json()["success"]):
 			print("Your project has been successfully updated.")
-		elif r.json()["error"] != None:
+		else:
 			print("There was an error updating your project:")
 			pprint.pprint(r.json()["error"])
-		else:
-			print("There was an error updating your project (%d). Check to make sure your input was valid"%r.status_code)
 
 		return r.json() if r.status_code == 200 else None
 
