@@ -1,6 +1,6 @@
 from Module import Module
 from Global import check
-import Global
+import Global, Crypt
 import requests, pprint, ast, copy
 
 class Session(Module):
@@ -15,7 +15,7 @@ class Session(Module):
 		Module.__init__(self, cmd, cmd_args)
 
 	def list(self):
-		r = requests.get(Global.makeURL("/api/v1/session"))
+		r = requests.get(Global.makeURL("/api/v1/session?token=%s"%Crypt.getToken()))
 		check(r.status_code == 200, "Malformed request to GET /api/v1/session")
 
 		data = r.json()
