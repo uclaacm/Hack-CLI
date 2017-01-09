@@ -5,9 +5,13 @@ from dateutil import tz
 from dateutil.parser import parse
 import time, sys
 
-use_local = SettingsFile().get('use_local')
+settings = SettingsFile()
+use_local = settings.get('use_local')
 use_local = use_local != None and eval(use_local)
-hostname = "http://localhost:5000" if use_local else "http://acm-hack-dev.herokuapp.com"
+use_dev = settings.get('use_dev')
+use_dev = use_dev != None and eval(use_dev)
+hostname = "http://localhost:5000" if use_local else "http://hack-ucla.herokuapp.com"
+hostname = "http://hack-ucla-dev.herokuapp.com" if use_dev else hostname
 
 def check(cond, msg=None):
 	if not cond:

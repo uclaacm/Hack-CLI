@@ -131,7 +131,7 @@ class Showcase(Module):
 
 		return r.json(), numRemoved
 
-	def printProjectObject(self, obj, fields=["id","date","title","contributors","technologies","link","image","desc"]):
+	def printProjectObject(self, obj, fields=["id","date","title","contributors","technologies","screenshots","link","image","desc"]):
 		if "id" in obj and "id" in fields: print(" id: %s"%obj["id"])
 		if "date" in obj and "date" in fields: print(" date: %s"%Global.UTCToLocalDisplay(obj["date"]))
 		if "title" in obj and "title" in fields: print(" title: %s"%obj["title"])
