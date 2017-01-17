@@ -32,7 +32,7 @@ class Session(Module):
 	def details(self):
 		check(len(self.cmd_args) > 0, "Getting session details requires a session ID")
 
-		r = requests.get(Global.makeURL("/api/v1/session/%s"%self.cmd_args[0]))
+		r = requests.get(Global.makeURL("/api/v1/session/%s?token=%s"%(self.cmd_args[0],Crypt.getToken())))
 		check(r.status_code == 200, "Malformed request to GET /api/v1/session/%s"%self.cmd_args[0])
 
 		data = r.json()
@@ -84,7 +84,7 @@ class Session(Module):
 	def update(self):
 		check(len(self.cmd_args) > 0, "Updating a session requires a session ID")
 
-		r = requests.get(Global.makeURL("/api/v1/session/%s"%self.cmd_args[0]))
+		r = requests.get(Global.makeURL("/api/v1/session/%s?token=%s"%(self.cmd_args[0],Crypt.getToken())))
 		response = r.json()
 		check(r.status_code == 200 and response["success"] and len(response["sessions"]) > 0, \
 			"No session with id '%s' found."%self.cmd_args[0])
