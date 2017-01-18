@@ -20,9 +20,16 @@ By default, the CLI will use the API on the production server. If you want to sw
 $ acm cli set use_local 1
 ```
 
+To switch to the remote dev server on `http://hack-ucla-dev.herokuapp.com`, 
+
+```BASH
+$ acm cli set use_dev 1
+```
+
 To revert to the production server,
 
 ```bash
 $ acm cli set use_local 0
+$ acm cli set use_dev 0
 ```
 
