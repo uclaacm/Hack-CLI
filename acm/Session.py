@@ -15,8 +15,8 @@ class Session(Module):
 		Module.__init__(self, cmd, cmd_args)
 
 	def list(self):
-		r = requests.get(Global.makeURL("/api/v1/session?token=%s"%Crypt.getToken()))
-		check(r.status_code == 200, "Malformed request to GET /api/v1/session")
+		r = requests.get(Global.makeURL("/api/v1/hackschool/session?token=%s"%Crypt.getToken()))
+		check(r.status_code == 200, "Malformed request to GET /api/v1/hackschool/session")
 
 		data = r.json()
 		print("Hack School Session List")
@@ -32,8 +32,8 @@ class Session(Module):
 	def details(self):
 		check(len(self.cmd_args) > 0, "Getting session details requires a session ID")
 
-		r = requests.get(Global.makeURL("/api/v1/session/%s?token=%s"%(self.cmd_args[0],Crypt.getToken())))
-		check(r.status_code == 200, "Malformed request to GET /api/v1/session/%s"%self.cmd_args[0])
+		r = requests.get(Global.makeURL("/api/v1/hackschool/session/%s?token=%s"%(self.cmd_args[0],Crypt.getToken())))
+		check(r.status_code == 200, "Malformed request to GET /api/v1/hackschool/session/%s"%self.cmd_args[0])
 
 		data = r.json()
 		check(len(data["sessions"]) > 0, "No session with ID '%s' found"%self.cmd_args[0])
@@ -72,7 +72,7 @@ class Session(Module):
 		choice = raw_input("Create this session? [y/n]: ")
 		check(choice == "y", "Aborted.")
 
-		r = requests.post(Global.makeURL("/api/v1/session"), json=Global.makeData(obj))
+		r = requests.post(Global.makeURL("/api/v1/hackschool/session"), json=Global.makeData(obj))
 		if (r.status_code == 200 and r.json()["success"]):
 			print("Your session has been successfully created.")
 		else:
@@ -84,7 +84,7 @@ class Session(Module):
 	def update(self):
 		check(len(self.cmd_args) > 0, "Updating a session requires a session ID")
 
-		r = requests.get(Global.makeURL("/api/v1/session/%s?token=%s"%(self.cmd_args[0],Crypt.getToken())))
+		r = requests.get(Global.makeURL("/api/v1/hackschool/session/%s?token=%s"%(self.cmd_args[0],Crypt.getToken())))
 		response = r.json()
 		check(r.status_code == 200 and response["success"] and len(response["sessions"]) > 0, \
 			"No session with id '%s' found."%self.cmd_args[0])
@@ -124,7 +124,7 @@ class Session(Module):
 		choice = raw_input("Make these changes? [y/n]: ")
 		check(choice == "y", "Aborted.")
 
-		r = requests.patch(Global.makeURL("/api/v1/session/%s"%self.cmd_args[0]), json=Global.makeData(obj))
+		r = requests.patch(Global.makeURL("/api/v1/hackschool/session/%s"%self.cmd_args[0]), json=Global.makeData(obj))
 		if (r.status_code == 200 and r.json()["success"]):
 			print("Your session has been successfully updated.")
 		else:
@@ -142,7 +142,7 @@ class Session(Module):
 		else:
 			q = "/" + self.cmd_args[0]
 
-		r = requests.delete(Global.makeURL("/api/v1/session" + q), json=Global.makeData())
+		r = requests.delete(Global.makeURL("/api/v1/hackschool/session" + q), json=Global.makeData())
 		check(r.status_code == 200, "Could not delete session(s). Status code: %d"%r.status_code)
 
 		numRemoved = int(r.json()["removed"])
