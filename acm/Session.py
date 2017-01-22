@@ -62,7 +62,8 @@ class Session(Module):
 					"points": raw_input("(optional) project.points: "),
 					"videoLink": raw_input("(optional) project.videoLink: "),
 					"slidesLink": raw_input("(optional) project.slidesLink: "),
-					"submissionLink": raw_input("(optional) project.submissionLink: ")
+					"submissionLink": raw_input("(optional) project.submissionLink: "),
+					"sourceCodeLink": raw_input("(optional) project.sourceCodeLink: ")
 				}
 			}
 		}
@@ -111,7 +112,8 @@ class Session(Module):
 					"points": raw_input("project.points: "),
 					"videoLink": raw_input("project.videoLink: "),
 					"slidesLink": raw_input("project.slidesLink: "),
-					"submissionLink": raw_input("project.submissionLink: ")
+					"submissionLink": raw_input("project.submissionLink: "),
+					"sourceCodeLink": raw_input("project.sourceCodeLink: ")
 				}
 			}
 		}
@@ -168,5 +170,6 @@ class Session(Module):
 			if "videoLink" in obj["project"]: print("     videoLink: %s"%obj["project"]["videoLink"])
 			if "slidesLink" in obj["project"]: print("     slidesLink: %s"%obj["project"]["slidesLink"])
 			if "submissionLink" in obj["project"]: print("     submissionLink: %s"%obj["project"]["submissionLink"])
+			if "sourceCodeLink" in obj["project"]: print("     sourceCodeLink: %s"%obj["project"]["sourceCodeLink"])
 
 		print("---")
