@@ -50,6 +50,7 @@ class Showcase(Module):
 			"project" : {
 				"title" : raw_input("(required) title: "),
 				"link" : raw_input("(required) project link: "),
+				"sourceLink" : raw_input("(optional) source code link: "),
 				"contributors" : [x.strip() for x in raw_input("(required) contributors, comma-separated: ").split(",") if len(x.strip()) > 0],
 				"technologies" : [x.strip() for x in raw_input("(required) technologies, comma-separated: ").split(",") if len(x.strip()) > 0],
 				"screenshots" : [x.strip() for x in raw_input("(required) screenshots, comma-separated: ").split(",") if len(x.strip()) > 0],
@@ -89,9 +90,10 @@ class Showcase(Module):
 			"project" : {
 				"title" : raw_input("title: "),
 				"link" : raw_input("project link: "),
+				"sourceLink" : raw_input("source code link: "),
 				"contributors" : [x.strip() for x in raw_input("contributors, comma-separated: ").split(",") if len(x.strip()) > 0],
 				"technologies" : [x.strip() for x in raw_input("technologies, comma-separated: ").split(",") if len(x.strip()) > 0],
-				"screenshots" : [x.strip() for x in raw_input("(required) screenshots, comma-separated: ").split(",") if len(x.strip()) > 0],
+				"screenshots" : [x.strip() for x in raw_input("screenshots, comma-separated: ").split(",") if len(x.strip()) > 0],
 				"image" : raw_input("image URL: "),
 				"desc" : raw_input("desc: ")
 			}
@@ -131,7 +133,7 @@ class Showcase(Module):
 
 		return r.json(), numRemoved
 
-	def printProjectObject(self, obj, fields=["id","date","title","contributors","technologies","screenshots","link","image","desc"]):
+	def printProjectObject(self, obj, fields=["id","date","title","contributors","technologies","screenshots","link","sourceLink","image","desc"]):
 		if "id" in obj and "id" in fields: print(" id: %s"%obj["id"])
 		if "date" in obj and "date" in fields: print(" date: %s"%Global.UTCToLocalDisplay(obj["date"]))
 		if "title" in obj and "title" in fields: print(" title: %s"%obj["title"])
@@ -139,6 +141,7 @@ class Showcase(Module):
 		if "technologies" in obj and "technologies" in fields: print(" technologies: %s"%", ".join(obj["technologies"]))
 		if "screenshots" in obj and "screenshots" in fields: print(" screenshots: %s"%", ".join(obj["screenshots"]))
 		if "link" in obj and "link" in fields: print(" link: %s"%obj["link"])
+		if "sourceLink" in obj and "sourceLink" in fields: print(" sourceLink: %s"%obj["sourceLink"])
 		if "image" in obj and "image" in fields: print(" image: %s"%obj["image"])
 		if "desc" in obj and "desc" in fields: print(" desc: %s"%obj["desc"])
 
