@@ -73,7 +73,7 @@ class Session(Module):
 		choice = raw_input("Make these changes? [y/n]: ")
 		check(choice == "y", "Aborted.")
 
-		self.api_request(method="PATCH", endpoint="/%s"%id, json=obj)
+		self.api_request(method="PATCH", endpoint="/%s"%id, auth=True, json=obj)
 		print("Your session has been successfully updated.")
 
 	def delete(self, id):
