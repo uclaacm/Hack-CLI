@@ -2,5 +2,5 @@
 **/build
 **/dist
 **/acm.*
-
+.vscode
 *.pyc

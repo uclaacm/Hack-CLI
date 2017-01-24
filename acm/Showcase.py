@@ -1,139 +1,85 @@
 from Module import Module
 from Global import check
+from Info import InfoField, Interpreter
 import Global
-import requests, pprint, ast, copy
+import pprint
 
 class Showcase(Module):
-	def __init__(self, cmd, cmd_args):
-		self.cmd_map = {
-			"list": self.list,
-			"details": self.details,
-			"add": self.add,
-			"update" : self.update,
-			"delete" : self.delete
+	def __init__(self):
+		Module.__init__(self)
+		self.api_url = "/api/v1/showcase"
+		self.obj_format = {
+			"project" : {
+				"title": InfoField(required=True),
+				"link": InfoField(required=True),
+				"sourceLink": InfoField(),
+				"contributors": InfoField(required=True, interpreter=Interpreter.list, additionalInfo="comma-separated"),
+				"technologies": InfoField(required=True, interpreter=Interpreter.list, additionalInfo="comma-separated"),
+				"screenshots": InfoField(required=True, interpreter=Interpreter.list, additionalInfo="comma-separated"),
+				"image": InfoField(),
+				"desc": InfoField()
+			}
 		}
-		Module.__init__(self, cmd, cmd_args)
 
 	def list(self):
-		r = requests.get(Global.makeURL("/api/v1/showcase"))
-		check(r.status_code == 200, "Malformed request to GET /api/v1/showcase")
-
-		data = r.json()
-		print("Showcase Project List")
-		print("==========")
+		data = self.api_request()
+		print("Showcase Project List\n==========")
 		if len(data["projects"]) == 0:
 			print "No projects"
 		else:
 			for project in data["projects"]:
-				self.printProjectObject(project, fields=["id", "title"])
+				self.printObj(project, fields=["id", "title"])
 
-		return data["projects"] if len(data["projects"]) > 0 else None
+	def details(self, id):
+		data = self.api_request(endpoint="/%s"%id)
+		check(len(data["projects"]) > 0, "No project with ID '%s' found"%id)
 
-	def details(self):
-		check(len(self.cmd_args) > 0, "Getting project details requires a project ID")
-
-		r = requests.get(Global.makeURL("/api/v1/showcase/%s"%self.cmd_args[0]))
-		check(r.status_code == 200, "Malformed request to GET /api/v1/showcase/%s"%self.cmd_args[0])
-
-		data = r.json()
-		check(len(data["projects"]) > 0, "No project with ID '%s' found"%self.cmd_args[0])
-
-		print("Showcase Project Details")
-		print("=============")
-		self.printProjectObject(data["projects"][0])
-
-		return data["projects"][0]
+		print("Showcase Project Details\n=============")
+		self.printObj(data["projects"][0])
 
 	def add(self):
 		print("Creating new project...")
-		obj = {
-			"project" : {
-				"title" : raw_input("(required) title: "),
-				"link" : raw_input("(required) project link: "),
-				"sourceLink" : raw_input("(optional) source code link: "),
-				"contributors" : [x.strip() for x in raw_input("(required) contributors, comma-separated: ").split(",") if len(x.strip()) > 0],
-				"technologies" : [x.strip() for x in raw_input("(required) technologies, comma-separated: ").split(",") if len(x.strip()) > 0],
-				"screenshots" : [x.strip() for x in raw_input("(required) screenshots, comma-separated: ").split(",") if len(x.strip()) > 0],
-				"image" : raw_input("(optional) image URL: "),
-				"desc" : raw_input("(optional) desc: ")
-			}
-		}
-
-		self.printProjectObject(obj["project"])
+		obj = self.requestInfo()
+		self.printObj(obj["project"])
 		choice = raw_input("Create this project? [y/n]: ")
 		check(choice == "y", "Aborted.")
 
-		r = requests.post(Global.makeURL("/api/v1/showcase"), json=Global.makeData(obj))
-		if (r.status_code == 200 and r.json()["success"]):
-			print("Your project has been successfully created.")
-		else:
-			print("There was a error creating your project:")
-			pprint.pprint(r.json()["error"])
+		self.api_request(method="POST", auth=True, json=obj)
+		print("Your project has been successfully created.")
 
-		return r.json() if r.status_code == 200 else None
-
-	def update(self):
-		check(len(self.cmd_args) > 0, "Updating a project requires a project ID")
-
-		r = requests.get(Global.makeURL("/api/v1/showcase/%s"%self.cmd_args[0]))
-		response = r.json()
-		check(r.status_code == 200 and response["success"] and len(response["projects"]) > 0, \
-			"No project with id '%s' found."%self.cmd_args[0])
+	def update(self, id):
+		data = self.api_request(endpoint="/%s"%id)
+		check(len(data["projects"]) > 0, "No project with id '%s' found."%id)
 
 		print("Current project data:")
-		self.printProjectObject(response["projects"][0])
+		self.printObj(data["projects"][0])
 		print("You will now be prompted to update this project")
 		print(" - Only fill out fields you want to change")
 		print(" - To leave a field unchanged, press 'enter'")
 
-		obj = {
-			"project" : {
-				"title" : raw_input("title: "),
-				"link" : raw_input("project link: "),
-				"sourceLink" : raw_input("source code link: "),
-				"contributors" : [x.strip() for x in raw_input("contributors, comma-separated: ").split(",") if len(x.strip()) > 0],
-				"technologies" : [x.strip() for x in raw_input("technologies, comma-separated: ").split(",") if len(x.strip()) > 0],
-				"screenshots" : [x.strip() for x in raw_input("screenshots, comma-separated: ").split(",") if len(x.strip()) > 0],
-				"image" : raw_input("image URL: "),
-				"desc" : raw_input("desc: ")
-			}
-		}
-
-		obj["project"] = Global.trimDict(obj["project"])
+		obj = self.requestInfo(update=True)
 		print("---")
 		print("Project changes:")
-		self.printProjectObject(obj["project"])
+		self.printObj(obj["project"])
 
 		choice = raw_input("Make these changes? [y/n]: ")
 		check(choice == "y", "Aborted.")
 
-		r = requests.patch(Global.makeURL("/api/v1/showcase/%s"%self.cmd_args[0]), json=Global.makeData(obj))
-		if (r.status_code == 200 and r.json()["success"]):
-			print("Your project has been successfully updated.")
-		else:
-			print("There was an error updating your project:")
-			pprint.pprint(r.json()["error"])
+		self.api_request(method="PATCH", endpoint="/%s"%id, auth=True, json=obj)
+		print("Your project has been successfully updated.")
 
-		return r.json() if r.status_code == 200 else None
-
-	def delete(self):
-		check(len(self.cmd_args) > 0, "Deleting a project must specify 'all' or a project ID")
-		if self.cmd_args[0] == "all":
+	def delete(self, id):
+		endpoint = "/%s"%id
+		if id == "all":
 			choice = raw_input("Do you really want to delete all showcase projects? [y/n] ")
 			check(choice == "y", "Aborted.")
-			q = ""
-		else:
-			q = "/" + self.cmd_args[0]
+			endpoint = ""
 
-		r = requests.delete(Global.makeURL("/api/v1/showcase" + q), json=Global.makeData())
-		check(r.status_code == 200, "Could not delete project(s). Status code: %d"%r.status_code)
-
-		numRemoved = int(r.json()["removed"])
+		data = self.api_request(method="DELETE", endpoint=endpoint, auth=True)
+		numRemoved = int(data["removed"])
 		print("%d project(s) deleted"%numRemoved if numRemoved > 0 else "No matching projects deleted.")
 
-		return r.json(), numRemoved
-
-	def printProjectObject(self, obj, fields=["id","date","title","contributors","technologies","screenshots","link","sourceLink","image","desc"]):
+	def printObj(self, obj, fields=["id","date","title","contributors","technologies","screenshots","link","sourceLink","image","desc"]):
 		if "id" in obj and "id" in fields: print(" id: %s"%obj["id"])
 		if "date" in obj and "date" in fields: print(" date: %s"%Global.UTCToLocalDisplay(obj["date"]))
 		if "title" in obj and "title" in fields: print(" title: %s"%obj["title"])

@@ -1,17 +1,7 @@
-from Settings import SettingsFile
-from Crypt import getToken
 from datetime import datetime
 from dateutil import tz
 from dateutil.parser import parse
 import time, sys
-
-settings = SettingsFile()
-use_local = settings.get('use_local')
-use_local = use_local != None and eval(use_local)
-use_dev = settings.get('use_dev')
-use_dev = use_dev != None and eval(use_dev)
-hostname = "http://localhost:5000" if use_local else "http://hack-ucla.herokuapp.com"
-hostname = "http://hack-ucla-dev.herokuapp.com" if use_dev else hostname
 
 def check(cond, msg=None):
 	if not cond:
@@ -19,17 +9,8 @@ def check(cond, msg=None):
 			print("Error: %s"%msg)
 		sys.exit(1)
 
-def makeURL(path):
-	return hostname + path
-
-def makeData(partial_obj={}):
-	obj = { "token" : getToken() }
-	obj.update(partial_obj)
-	return obj
-
 def getDateInput(query):
 	user_input = raw_input("%s (formatted as MM-DD-YYYY HH:MM 24-hr format): "%query)
-
 	if (user_input.strip() == ""):
 		return ""
 
