@@ -61,11 +61,8 @@ class Session(Module):
 
 		print("Current session data:")
 		self.printObj(data["sessions"][0])
-		print("You will now be prompted to update this session")
-		print(" - Only fill out fields you want to change")
-		print(" - To leave a field unchanged, press 'enter'")
-
 		obj = self.requestInfo(update=True)
+		
 		print("---")
 		print("Project changes:")
 		self.printObj(obj["session"])

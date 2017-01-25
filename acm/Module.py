@@ -35,12 +35,17 @@ class Module(object):
 	def printObj(self, obj, fields=[]):
 		raise NotImplementedError()
 
-	def requestInfo(self, format=None, path="", update=False):
+	def requestInfo(self, format=None, path="", update=False, printUpdate=True):
+		if (update and printUpdate):
+			print("You will now be prompted to update this object")
+			print(" - Only fill out fields you want to change")
+			print(" - To leave a field unchanged, press 'enter'")
+			print(" - To delete a field, type '-'")
 		format = self.obj_format if not format else format
 		data = {  }
 		for key in sorted(format):
 			if type(format[key]) == type({}):
-				data[key] = self.requestInfo(format[key], path=path+key+".", update=update)
+				data[key] = self.requestInfo(format[key], path=path+key+".", update=update, printUpdate=False)
 			else:
 				msg = ""
 				if not update:

@@ -55,11 +55,8 @@ class Event(Module):
 
 		print("Current event data:")
 		self.printObj(data["events"][0])
-		print("You will now be prompted to update this event")
-		print(" - Only fill out fields you want to change")
-		print(" - To leave a field unchanged, press 'enter'")
-
 		obj = self.requestInfo(update=True)
+		
 		print("---")
 		print("Event changes:")
 		self.printObj(obj["event"])
